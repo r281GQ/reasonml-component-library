@@ -2,9 +2,16 @@
 'use strict';
 
 var React = require("react");
+var Box$ReactHooksTemplate = require("./Components/Box.bs.js");
 
 function App(Props) {
-  return React.createElement("div", undefined, "hye");
+  return React.createElement(Box$ReactHooksTemplate.make, {
+              children: "hye",
+              p: /* xxl */5994348,
+              px: /* l */108,
+              py: /* m */109,
+              pt: /* xxs */5994355
+            });
 }
 
 var make = App;
