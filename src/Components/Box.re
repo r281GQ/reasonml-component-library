@@ -14,9 +14,11 @@ module ToCss = {
     | `xxl => `px(72);
 };
 
+type box = [ Theme.spacing | `mq(list(Theme.spacing))];
+
 [@react.component]
 let make = (~children, ~p=?, ~px=?, ~py=?, ~pl=?, ~pr=?, ~pt=?, ~pb=?) => {
-  let paddingTop: option(Theme.spacing) =
+  let paddingTop =
     switch (p, py, pt) {
     | (_, _, Some(value)) => Some(value)
     | (_, Some(value), None) => Some(value)
@@ -24,7 +26,7 @@ let make = (~children, ~p=?, ~px=?, ~py=?, ~pl=?, ~pr=?, ~pt=?, ~pb=?) => {
     | (_, _, _) => None
     };
 
-  let paddingBottom: option(Theme.spacing) =
+  let paddingBottom =
     switch (p, py, pb) {
     | (_, _, Some(value)) => Some(value)
     | (_, Some(value), None) => Some(value)
@@ -32,7 +34,7 @@ let make = (~children, ~p=?, ~px=?, ~py=?, ~pl=?, ~pr=?, ~pt=?, ~pb=?) => {
     | (_, _, _) => None
     };
 
-  let paddingRight: option(Theme.spacing) =
+  let paddingRight =
     switch (p, px, pr) {
     | (_, _, Some(value)) => Some(value)
     | (_, Some(value), None) => Some(value)
@@ -40,7 +42,7 @@ let make = (~children, ~p=?, ~px=?, ~py=?, ~pl=?, ~pr=?, ~pt=?, ~pb=?) => {
     | (_, _, _) => None
     };
 
-  let paddingLeft: option(Theme.spacing) =
+  let paddingLeft: option(box) =
     switch (p, px, pl) {
     | (_, _, Some(value)) => Some(value)
     | (_, Some(value), None) => Some(value)
@@ -49,27 +51,45 @@ let make = (~children, ~p=?, ~px=?, ~py=?, ~pl=?, ~pr=?, ~pt=?, ~pb=?) => {
     };
 
   let leftResult =
-    paddingLeft->Belt.Option.mapWithDefault(Css.empty([]), x =>
-      x |> ToCss.spacing_to_css |> Css.paddingLeft
+    paddingLeft->Belt.Option.mapWithDefault(
+      [],
+      x => {
+        let result =
+          switch (x) {
+          | #Theme.spacing as spacing => [
+              spacing |> ToCss.spacing_to_css |> Css.paddingLeft,
+            ]
+          | `mq(values) =>
+            // `mq([`xxs, `xs])
+            values->Belt.List.mapWithIndex((index, value) =>
+              switch (index) {
+              | 0 => value |> ToCss.spacing_to_css |> Css.paddingLeft
+              | _ =>
+                Css.media(
+                  "",
+                  [Css.paddingLeft(value |> ToCss.spacing_to_css)],
+                )
+              }
+            )
+          };
+        result;
+      },
     );
 
-  let rightResult =
-    paddingRight->Belt.Option.mapWithDefault(Css.empty([]), x =>
-      x |> ToCss.spacing_to_css |> Css.paddingRight
-    );
+  // let rightResult =
+  //   paddingRight->Belt.Option.mapWithDefault(Css.empty([]), x =>
+  //     x |> ToCss.spacing_to_css |> Css.paddingRight
+  //   );
 
-  let topResult =
-    paddingTop->Belt.Option.mapWithDefault(Css.empty([]), x =>
-      x |> ToCss.spacing_to_css |> Css.paddingTop
-    );
+  // let topResult =
+  //   paddingTop->Belt.Option.mapWithDefault(Css.empty([]), x =>
+  //     x |> ToCss.spacing_to_css |> Css.paddingTop
+  //   );
 
-  let bottomResult =
-    paddingBottom->Belt.Option.mapWithDefault(Css.empty([]), x =>
-      x |> ToCss.spacing_to_css |> Css.paddingBottom
-    );
+  // let bottomResult =
+  //   paddingBottom->Belt.Option.mapWithDefault(Css.empty([]), x =>
+  //     x |> ToCss.spacing_to_css |> Css.paddingBottom
+  //   );
 
-  <div
-    className={Css.style([leftResult, rightResult, topResult, bottomResult])}>
-    children
-  </div>;
+  <div className={Css.style(leftResult)}> children </div>;
 };

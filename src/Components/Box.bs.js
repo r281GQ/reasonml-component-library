@@ -3,6 +3,7 @@
 
 var Css = require("bs-css/src/Css.js");
 var React = require("react");
+var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Belt_Option = require("bs-platform/lib/js/belt_Option.js");
 
 var Theme = /* module */[];
@@ -58,57 +59,37 @@ function Box(Props) {
   var children = Props.children;
   var p = Props.p;
   var px = Props.px;
-  var py = Props.py;
+  Props.py;
   var pl = Props.pl;
-  var pr = Props.pr;
-  var pt = Props.pt;
-  var pb = Props.pb;
-  var paddingTop = pt !== undefined ? pt : (
-      py !== undefined ? py : (
-          p !== undefined ? p : undefined
-        )
-    );
-  var paddingBottom = pb !== undefined ? pb : (
-      py !== undefined ? py : (
-          p !== undefined ? p : undefined
-        )
-    );
-  var paddingRight = pr !== undefined ? pr : (
-      px !== undefined ? px : (
-          p !== undefined ? p : undefined
-        )
-    );
+  Props.pr;
+  Props.pt;
+  Props.pb;
   var paddingLeft = pl !== undefined ? pl : (
       px !== undefined ? px : (
           p !== undefined ? p : undefined
         )
     );
-  var leftResult = Belt_Option.mapWithDefault(paddingLeft, Css.empty(/* [] */0), (function (x) {
-          return Css.paddingLeft(spacing_to_css(x));
-        }));
-  var rightResult = Belt_Option.mapWithDefault(paddingRight, Css.empty(/* [] */0), (function (x) {
-          return Css.paddingRight(spacing_to_css(x));
-        }));
-  var topResult = Belt_Option.mapWithDefault(paddingTop, Css.empty(/* [] */0), (function (x) {
-          return Css.paddingTop(spacing_to_css(x));
-        }));
-  var bottomResult = Belt_Option.mapWithDefault(paddingBottom, Css.empty(/* [] */0), (function (x) {
-          return Css.paddingBottom(spacing_to_css(x));
+  var leftResult = Belt_Option.mapWithDefault(paddingLeft, /* [] */0, (function (x) {
+          if (typeof x === "number") {
+            return /* :: */[
+                    Css.paddingLeft(spacing_to_css(x)),
+                    /* [] */0
+                  ];
+          } else {
+            return Belt_List.mapWithIndex(x[1], (function (index, value) {
+                          if (index !== 0) {
+                            return Css.media("", /* :: */[
+                                        Css.paddingLeft(spacing_to_css(value)),
+                                        /* [] */0
+                                      ]);
+                          } else {
+                            return Css.paddingLeft(spacing_to_css(value));
+                          }
+                        }));
+          }
         }));
   return React.createElement("div", {
-              className: Css.style(/* :: */[
-                    leftResult,
-                    /* :: */[
-                      rightResult,
-                      /* :: */[
-                        topResult,
-                        /* :: */[
-                          bottomResult,
-                          /* [] */0
-                        ]
-                      ]
-                    ]
-                  ])
+              className: Css.style(leftResult)
             }, children);
 }
 
