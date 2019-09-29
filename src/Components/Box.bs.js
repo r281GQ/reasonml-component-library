@@ -56,7 +56,7 @@ function spacing_to_css(param) {
 
 var ToCss = /* module */[/* spacing_to_css */spacing_to_css];
 
-function convert_direction_to_rule(param) {
+function convert_direction_to_padding_rule(param) {
   switch (param) {
     case 0 : 
         return Css.paddingRight;
@@ -71,7 +71,7 @@ function convert_direction_to_rule(param) {
 }
 
 function createStyleSheet(value, direction) {
-  var fn = convert_direction_to_rule(direction);
+  var fn = convert_direction_to_padding_rule(direction);
   return Belt_Option.mapWithDefault(value, /* [] */0, (function (x) {
                 if (typeof x === "number") {
                   return /* :: */[
@@ -135,13 +135,19 @@ function Box(Props) {
     );
   var leftResult = Css.style(createStyleSheet(paddingLeft, /* Left */1));
   var rightResult = Css.style(createStyleSheet(paddingRight, /* Right */0));
-  createStyleSheet(paddingTop, /* Top */2);
-  createStyleSheet(paddingBottom, /* Bottom */3);
+  var topResult = Css.style(createStyleSheet(paddingTop, /* Top */2));
+  var bottomResult = Css.style(createStyleSheet(paddingBottom, /* Bottom */3));
   var finalResult = Css.merge(/* :: */[
         leftResult,
         /* :: */[
           rightResult,
-          /* [] */0
+          /* :: */[
+            topResult,
+            /* :: */[
+              bottomResult,
+              /* [] */0
+            ]
+          ]
         ]
       ]);
   return React.createElement("div", {
@@ -153,7 +159,7 @@ var make = Box;
 
 exports.Theme = Theme;
 exports.ToCss = ToCss;
-exports.convert_direction_to_rule = convert_direction_to_rule;
+exports.convert_direction_to_padding_rule = convert_direction_to_padding_rule;
 exports.createStyleSheet = createStyleSheet;
 exports.make = make;
 /* Css Not a pure module */

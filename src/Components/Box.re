@@ -22,7 +22,7 @@ type direction =
   | Top
   | Bottom;
 
-let convert_direction_to_rule =
+let convert_direction_to_padding_rule =
   fun
   | Right => Css.paddingRight
   | Left => Css.paddingLeft
@@ -30,7 +30,7 @@ let convert_direction_to_rule =
   | Bottom => Css.paddingBottom;
 
 let createStyleSheet = (value, direction) => {
-  let fn = direction |> convert_direction_to_rule;
+  let fn = direction |> convert_direction_to_padding_rule;
 
   value->Belt.Option.mapWithDefault(
     [],
@@ -101,65 +101,11 @@ let make = (~children, ~p=?, ~px=?, ~py=?, ~pl=?, ~pr=?, ~pt=?, ~pb=?) => {
 
   let leftResult = createStyleSheet(paddingLeft, Left) |> Css.style;
   let rightResult = createStyleSheet(paddingRight, Right) |> Css.style;
-  let topResult = createStyleSheet(paddingTop, Top);
-  let bottomResult = createStyleSheet(paddingBottom, Bottom);
+  let topResult = createStyleSheet(paddingTop, Top) |> Css.style;
+  let bottomResult = createStyleSheet(paddingBottom, Bottom) |> Css.style;
 
-  let finalResult = Css.merge([leftResult, rightResult]);
-  // Belt.List.concatMany([|
-  //   leftResult,
-  //   rightResult,
-  //   topResult,
-  //   bottomResult,
-  // |]);
-
-  // paddingLeft->Belt.Option.mapWithDefault(
-  //   [],
-  //   x => {
-  //     let result =
-  //       switch (x) {
-  //       | #Theme.spacing as spacing => [
-  //           spacing |> ToCss.spacing_to_css |> Css.paddingLeft,
-  //         ]
-  //       | `mq(values) =>
-  //         values->Belt.List.mapWithIndex((index, value) =>
-  //           switch (index) {
-  //           | 0 => value |> ToCss.spacing_to_css |> Css.paddingLeft
-  //           | 1 =>
-  //             Css.media(
-  //               "(min-width: 40em)",
-  //               [value |> ToCss.spacing_to_css |> Css.paddingLeft],
-  //             )
-  //           | 2 =>
-  //             Css.media(
-  //               "(min-width: 52em)",
-  //               [value |> ToCss.spacing_to_css |> Css.paddingLeft],
-  //             )
-  //           | _ =>
-  //             Css.media(
-  //               "(min-width: 64em)",
-  //               [value |> ToCss.spacing_to_css |> Css.paddingLeft],
-  //             )
-  //           }
-  //         )
-  //       };
-  //     result;
-  //   },
-  // );
-
-  // let rightResult =
-  //   paddingRight->Belt.Option.mapWithDefault(Css.empty([]), x =>
-  //     x |> ToCss.spacing_to_css |> Css.paddingRight
-  //   );
-
-  // let topResult =
-  //   paddingTop->Belt.Option.mapWithDefault(Css.empty([]), x =>
-  //     x |> ToCss.spacing_to_css |> Css.paddingTop
-  //   );
-
-  // let bottomResult =
-  //   paddingBottom->Belt.Option.mapWithDefault(Css.empty([]), x =>
-  //     x |> ToCss.spacing_to_css |> Css.paddingBottom
-  //   );
+  let finalResult =
+    Css.merge([leftResult, rightResult, topResult, bottomResult]);
 
   <div className=finalResult> children </div>;
 };
