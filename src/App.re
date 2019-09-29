@@ -1,2 +1,3 @@
 [@react.component]
-let make = () => <Box p=`xxs> {ReasonReact.string("hye")} </Box>;
+let make = () =>
+  <Box p={`mq([`xxl, `xl, `m, `xxs])}> {ReasonReact.string("hye")} </Box>;

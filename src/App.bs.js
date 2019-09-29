@@ -7,7 +7,22 @@ var Box$ReactHooksTemplate = require("./Components/Box.bs.js");
 function App(Props) {
   return React.createElement(Box$ReactHooksTemplate.make, {
               children: "hye",
-              p: /* xxs */5994355
+              p: /* `mq */[
+                24420,
+                /* :: */[
+                  /* xxl */5994348,
+                  /* :: */[
+                    /* xl */26868,
+                    /* :: */[
+                      /* m */109,
+                      /* :: */[
+                        /* xxs */5994355,
+                        /* [] */0
+                      ]
+                    ]
+                  ]
+                ]
+              ]
             });
 }
 

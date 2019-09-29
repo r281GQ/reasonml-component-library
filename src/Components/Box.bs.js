@@ -2,6 +2,7 @@
 'use strict';
 
 var Css = require("bs-css/src/Css.js");
+var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Belt_Option = require("bs-platform/lib/js/belt_Option.js");
@@ -55,41 +56,96 @@ function spacing_to_css(param) {
 
 var ToCss = /* module */[/* spacing_to_css */spacing_to_css];
 
+function convert_direction_to_rule(param) {
+  switch (param) {
+    case 0 : 
+        return Css.paddingRight;
+    case 1 : 
+        return Css.paddingLeft;
+    case 2 : 
+        return Css.paddingTop;
+    case 3 : 
+        return Css.paddingBottom;
+    
+  }
+}
+
+function createStyleSheet(value, direction) {
+  var fn = convert_direction_to_rule(direction);
+  return Belt_Option.mapWithDefault(value, /* [] */0, (function (x) {
+                if (typeof x === "number") {
+                  return /* :: */[
+                          Curry._1(fn, spacing_to_css(x)),
+                          /* [] */0
+                        ];
+                } else {
+                  return Belt_List.mapWithIndex(x[1], (function (index, value) {
+                                switch (index) {
+                                  case 0 : 
+                                      return Curry._1(fn, spacing_to_css(value));
+                                  case 1 : 
+                                      return Css.media("(min-width: 40em)", /* :: */[
+                                                  Curry._1(fn, spacing_to_css(value)),
+                                                  /* [] */0
+                                                ]);
+                                  case 2 : 
+                                      return Css.media("(min-width: 52em)", /* :: */[
+                                                  Curry._1(fn, spacing_to_css(value)),
+                                                  /* [] */0
+                                                ]);
+                                  default:
+                                    return Css.media("(min-width: 64em)", /* :: */[
+                                                Curry._1(fn, spacing_to_css(value)),
+                                                /* [] */0
+                                              ]);
+                                }
+                              }));
+                }
+              }));
+}
+
 function Box(Props) {
   var children = Props.children;
   var p = Props.p;
   var px = Props.px;
-  Props.py;
+  var py = Props.py;
   var pl = Props.pl;
-  Props.pr;
-  Props.pt;
-  Props.pb;
+  var pr = Props.pr;
+  var pt = Props.pt;
+  var pb = Props.pb;
+  var paddingTop = pt !== undefined ? pt : (
+      py !== undefined ? py : (
+          p !== undefined ? p : undefined
+        )
+    );
+  var paddingBottom = pb !== undefined ? pb : (
+      py !== undefined ? py : (
+          p !== undefined ? p : undefined
+        )
+    );
+  var paddingRight = pr !== undefined ? pr : (
+      px !== undefined ? px : (
+          p !== undefined ? p : undefined
+        )
+    );
   var paddingLeft = pl !== undefined ? pl : (
       px !== undefined ? px : (
           p !== undefined ? p : undefined
         )
     );
-  var leftResult = Belt_Option.mapWithDefault(paddingLeft, /* [] */0, (function (x) {
-          if (typeof x === "number") {
-            return /* :: */[
-                    Css.paddingLeft(spacing_to_css(x)),
-                    /* [] */0
-                  ];
-          } else {
-            return Belt_List.mapWithIndex(x[1], (function (index, value) {
-                          if (index !== 0) {
-                            return Css.media("", /* :: */[
-                                        Css.paddingLeft(spacing_to_css(value)),
-                                        /* [] */0
-                                      ]);
-                          } else {
-                            return Css.paddingLeft(spacing_to_css(value));
-                          }
-                        }));
-          }
-        }));
+  var leftResult = Css.style(createStyleSheet(paddingLeft, /* Left */1));
+  var rightResult = Css.style(createStyleSheet(paddingRight, /* Right */0));
+  createStyleSheet(paddingTop, /* Top */2);
+  createStyleSheet(paddingBottom, /* Bottom */3);
+  var finalResult = Css.merge(/* :: */[
+        leftResult,
+        /* :: */[
+          rightResult,
+          /* [] */0
+        ]
+      ]);
   return React.createElement("div", {
-              className: Css.style(leftResult)
+              className: finalResult
             }, children);
 }
 
@@ -97,5 +153,7 @@ var make = Box;
 
 exports.Theme = Theme;
 exports.ToCss = ToCss;
+exports.convert_direction_to_rule = convert_direction_to_rule;
+exports.createStyleSheet = createStyleSheet;
 exports.make = make;
 /* Css Not a pure module */
